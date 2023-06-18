@@ -44,7 +44,7 @@ while (!Console.KeyAvailable)
     });
     client.FirstPeer.Send(writer, DeliveryMethod.ReliableOrdered);
 
-    Thread.Sleep(15);
+    // Thread.Sleep(1);
 }
 
 client.Stop();

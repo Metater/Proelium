@@ -38,9 +38,9 @@ public class Server
 
         Packets packets = new()
         {
-            NetManager = netManager,
             Pools = pools,
-            PacketProcessor = packetProcessor
+            PacketProcessor = packetProcessor,
+            NetManager = netManager
         };
         
         return new()
@@ -95,9 +95,11 @@ public class Server
 
         foreach ((var packet, NetPeer peer) in Ctx.Packets.Receive<TestPacket>())
         {
-            //Console.WriteLine($"Got packet from {peer.EndPoint}");
-            //Console.WriteLine($"Position {packet.TestPosition}");
-            //Console.WriteLine($"String {packet.TestString}");
+            Console.WriteLine($"Got packet from {peer.EndPoint}");
+            Console.WriteLine($"Position {packet.TestPosition}");
+            Console.WriteLine($"String {packet.TestString}");
+
+            Ctx.Pools.Return(packet);
         }
     }
 

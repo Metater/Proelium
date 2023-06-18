@@ -6,26 +6,22 @@ namespace Proelium.Server.Collections;
 
 public class Packets
 {
-    public required NetManager NetManager { get; init; }
     public required Pools Pools { get; init; }
     public required NetPacketProcessor PacketProcessor { get; init; }
+    public required NetManager NetManager { get; init; }
 
     private readonly Dictionary<Type, List<ValueTuple<IPacket, NetPeer>>> lists = new();
     private readonly HashSet<Type> registeredPackets = new();
     private readonly NetDataWriter writer = new();
 
-    public IEnumerable<ValueTuple<T, NetPeer>> Receive<T>(bool returnToPool = true) where T : class, IPacket, new()
+    public IEnumerable<ValueTuple<T, NetPeer>> Receive<T>() where T : class, IPacket, new()
     {
         Type type = typeof(T);
         if (!lists.TryGetValue(type, out var list))
         {
-            if (!registeredPackets.Contains(type))
-            {
-                registeredPackets.Add(type);
-                T packet = Pools.Get<T>();
-                packet.RegisterNestedTypes(PacketProcessor);
-                Pools.Return(packet);
-            }
+            T packet = Pools.Get<T>();
+            TryRegister(type, packet);
+            Pools.Return(packet);
 
             list = new();
             lists[type] = list;
@@ -41,45 +37,35 @@ public class Packets
             yield return ((T)packet, peer);
         }
 
-        if (!returnToPool)
-        {
-            list.Clear();
-            yield break;
-        }
-
-        foreach ((IPacket packet, _) in list)
-        {
-            Pools.Return(packet);
-        }
-
         list.Clear();
     }
 
     public void Send<T>(T packet, NetPeer peer, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered) where T : class, IPacket, new()
     {
-        Type type = typeof(T);
-        if (!registeredPackets.Contains(type))
-        {
-            registeredPackets.Add(type);
-            packet.RegisterNestedTypes(PacketProcessor);
-        }
-
-        writer.Reset();
-        PacketProcessor.Write(writer, packet);
+        TryRegister(typeof(T), packet);
+        Write(packet);
         peer.Send(writer, deliveryMethod);
     }
 
     public void SendToAll<T>(T packet, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered) where T : class, IPacket, new()
     {
-        Type type = typeof(T);
+        TryRegister(typeof(T), packet);
+        Write(packet);
+        NetManager.SendToAll(writer, deliveryMethod);
+    }
+
+    private void TryRegister(Type type, IPacket packet)
+    {
         if (!registeredPackets.Contains(type))
         {
             registeredPackets.Add(type);
             packet.RegisterNestedTypes(PacketProcessor);
         }
+    }
 
+    private void Write<T>(T packet) where T : class, IPacket, new()
+    {
         writer.Reset();
         PacketProcessor.Write(writer, packet);
-        NetManager.SendToAll(writer, deliveryMethod);
     }
 }
