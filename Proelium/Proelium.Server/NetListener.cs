@@ -1,26 +1,33 @@
 ﻿using LiteNetLib;
+using LiteNetLib.Utils;
+using Proelium.Server.Collections;
+using Proelium.Server.General;
 using Proelium.Shared;
 using System.Net;
 using System.Net.Sockets;
 
 namespace Proelium.Server;
 
-public class NetListener : INetEventListener, IRequireContext
+public class NetListener : INetEventListener
 {
-    public required Context Ctx { get; init; }
+    public required Time Time { get; init; }
+    public required Pools Pools { get; init; }
+    public required Events Events { get; init; }
+    public required Players Players { get; init; }
+    public required NetPacketProcessor PacketProcessor { get; init; }
 
     public void OnConnectionRequest(ConnectionRequest request)
     {
-        if (Ctx.time.TickId < 1)
+        if (Time.TickId < 1)
         {
             request.Reject();
             return;
         }
 
-        var packet = Ctx.pools.Get<ConnectionDataPacket>();
+        var packet = Pools.Get<ConnectionDataPacket>();
         packet.Deserialize(request.Data);
         NetPeer peer = request.Accept();
-        Ctx.players.connectionDataPackets[peer.Id] = packet;
+        Players.connectionDataPackets[peer.Id] = packet;
     }
 
     public void OnNetworkError(IPEndPoint endPoint, SocketError socketError)
@@ -35,7 +42,7 @@ public class NetListener : INetEventListener, IRequireContext
 
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
     {
-        
+        PacketProcessor.ReadAllPackets(reader, peer);
     }
 
     public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
@@ -45,19 +52,19 @@ public class NetListener : INetEventListener, IRequireContext
 
     public void OnPeerConnected(NetPeer peer)
     {
-        Ctx.players.peers.Add(peer);
+        Players.peers.Add(peer);
 
-        Ctx.peerConnectedEvent.Add(Ctx.time, new(peer));
+        Events.onPeerConnected.Add(Time, new(peer));
     }
 
     public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
     {
-        var packet = Ctx.players.connectionDataPackets[peer.Id];
-        Ctx.players.connectionDataPackets.Remove(peer.Id);
-        Ctx.pools.Return(packet);
+        var packet = Players.connectionDataPackets[peer.Id];
+        Players.connectionDataPackets.Remove(peer.Id);
+        Pools.Return(packet);
 
-        Ctx.players.peers.Remove(peer);
+        Players.peers.Remove(peer);
 
-        Ctx.peerDisconnectedEvent.Add(Ctx.time, new(peer));
+        Events.onPeerDisconnected.Add(Time, new(peer));
     }
 }

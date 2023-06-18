@@ -1,4 +1,4 @@
-﻿namespace Proelium.Shared.Collections;
+﻿namespace Proelium.Server.Collections;
 
 public class Pools
 {
@@ -17,7 +17,6 @@ public class Pools
         {
             stack = new();
             pools[type] = stack;
-
         }
 
         if (!stack.TryPop(out var item))
@@ -35,8 +34,7 @@ public class Pools
             throw new ArgumentNullException(nameof(item));
         }
 
-        Type type = typeof(T);
-        if (!pools.TryGetValue(type, out var stack))
+        if (!pools.TryGetValue(typeof(T), out var stack))
         {
             return;
         }

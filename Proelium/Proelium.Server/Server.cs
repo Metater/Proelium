@@ -1,36 +1,75 @@
-﻿using Microsoft.VisualBasic;
+﻿using LiteNetLib;
+using LiteNetLib.Utils;
+using Proelium.Server.Collections;
+using Proelium.Server.General;
+using Proelium.Shared.Packets;
 
 namespace Proelium.Server;
 
 public class Server
 {
-    private readonly Context ctx;
+    public required Context Ctx { get; init; }
 
-    private readonly NetListener netListener;
-
-    public Server()
+    public static Context DefaultContext()
     {
-        ctx = Start();
+        int port = 7777;
+        Time time = new(60);
+        Pools pools = new(100);
+        Events events = new();
+        Players players = new();
 
-        netListener = new()
+        NetPacketProcessor packetProcessor = new();
+
+        NetListener netListener = new()
         {
-            Ctx = ctx
+            Time = time,
+            Pools = pools,
+            Events = events,
+            Players = players,
+            PacketProcessor = packetProcessor
+        };
+
+        NetManager netManager = new(netListener)
+        {
+            AutoRecycle = true,
+            IPv6Enabled = true,
+            UseNativeSockets = true
+        };
+
+        Packets packets = new()
+        {
+            NetManager = netManager,
+            Pools = pools,
+            PacketProcessor = packetProcessor
+        };
+        
+        return new()
+        {
+            Port = port,
+            Time = time,
+            Pools = pools,
+            Events = events,
+            Players = players,
+            NetManager = netManager,
+            Packets = packets
         };
     }
 
     public void Run(CancellationToken cancellationToken)
     {
-        ctx.time.Start();
+        Start();
+
+        Ctx.Time.Start();
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            while (ctx.time.ShouldTick())
+            while (Ctx.Time.ShouldTick())
             {
                 Tick();
 
-                if (ctx.time.TickId % ctx.time.ticksPerSecond == 0)
+                if (Ctx.Time.TickId % Ctx.Time.ticksPerSecond == 0)
                 {
-                    Console.Title = $"TPS: {ctx.time.ticksPerSecond} | Uptime: {(ulong)ctx.time.Now}s | Tick Id: {ctx.time.TickId} | Time Per Tick: {(ctx.time.Now - ctx.time.TickTime) * 1000.0:0.000}ms";
+                    Console.Title = $"TPS: {Ctx.Time.ticksPerSecond} | Uptime: {(ulong)Ctx.Time.Now}s | Tick Id: {Ctx.Time.TickId} | Time Per Tick: {(Ctx.Time.Now - Ctx.Time.TickTime) * 1000.0:0.000}ms";
                 }
             }
 
@@ -40,27 +79,30 @@ public class Server
         Stop();
     }
 
-    private static Context Start()
+    private void Start()
     {
-        return new();
+        Ctx.NetManager.Start(Ctx.Port);
     }
 
     private void Tick()
     {
-        Console.WriteLine($"Tick {ctx.time.TickId}");
+        Ctx.NetManager.PollEvents();
 
-        if (ctx.time.TickId < 1)
+        foreach (var connection in Ctx.Events.onPeerConnected.Get(Ctx.Time))
         {
-            
+            Console.WriteLine($"Player connected, id: {connection.Peer.Id}");
         }
-        else
+
+        foreach ((var packet, NetPeer peer) in Ctx.Packets.Receive<TestPacket>())
         {
-            Console.WriteLine("Ready");
+            //Console.WriteLine($"Got packet from {peer.EndPoint}");
+            //Console.WriteLine($"Position {packet.TestPosition}");
+            //Console.WriteLine($"String {packet.TestString}");
         }
     }
 
     private void Stop()
     {
-        Console.WriteLine($"Stopped on tick {ctx.time.TickId}");
+        Ctx.NetManager.Stop();
     }
 }

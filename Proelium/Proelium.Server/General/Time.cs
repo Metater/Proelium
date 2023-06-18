@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Proelium.Server;
+namespace Proelium.Server.General;
 
 public class Time
 {

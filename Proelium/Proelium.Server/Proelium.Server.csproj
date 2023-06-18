@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Proelium.Shared\Proelium.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Generated\" />
+  </ItemGroup>
+
 </Project>

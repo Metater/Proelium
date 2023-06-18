@@ -1,4 +1,6 @@
-﻿namespace Proelium.Server.Collections;
+﻿using Proelium.Server.General;
+
+namespace Proelium.Server.Collections;
 
 public class StructEvent<T> where T : struct
 {
