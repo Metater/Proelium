@@ -1,6 +1,6 @@
 ﻿using Proelium.Server.General;
 
-namespace Proelium.Server.Collections;
+namespace Proelium.Server.Patterns;
 
 public class StructEvent<T> where T : struct
 {
@@ -26,5 +26,10 @@ public class StructEvent<T> where T : struct
         }
 
         return events;
+    }
+
+    public void Clear()
+    {
+        currentTickId = ulong.MaxValue;
     }
 }

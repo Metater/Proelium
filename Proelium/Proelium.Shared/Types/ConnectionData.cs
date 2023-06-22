@@ -1,17 +1,18 @@
 ﻿using LiteNetLib.Utils;
-using Proelium.Shared.Packets;
 
 namespace Proelium.Shared;
 
-public class ConnectionDataPacket : IPacket, INetSerializable
+public class ConnectionData : INetSerializable
 {
+    public string Name { get; set; } = "";
+
     public void Deserialize(NetDataReader reader)
     {
-
+        Name = reader.GetString();
     }
 
     public void Serialize(NetDataWriter writer)
     {
-
+        writer.Put(Name);
     }
 }

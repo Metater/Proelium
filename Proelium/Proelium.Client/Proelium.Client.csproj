@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--<ProjectReference Include="..\Proelium.Server.Generators\Proelium.Server.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
     <ProjectReference Include="..\Proelium.Shared\Proelium.Shared.csproj" />
   </ItemGroup>
 

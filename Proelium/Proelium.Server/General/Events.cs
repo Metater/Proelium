@@ -1,9 +1,13 @@
 ﻿using LiteNetLib;
+using Proelium.Server.Patterns;
 
-namespace Proelium.Server;
+namespace Proelium.Server.General;
 
-public partial class Events
+public class Events
 {
     public record struct PeerConnected(NetPeer Peer);
+    public readonly StructEvent<PeerConnected> peerConnected = new();
+
     public record struct PeerDisconnected(NetPeer Peer);
+    public readonly StructEvent<PeerDisconnected> peerDisconnected = new();
 }
