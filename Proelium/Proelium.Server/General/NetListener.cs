@@ -31,6 +31,7 @@ public class NetListener : INetEventListener
             );
             return;
         }
+
         NetPeer peer = request.Accept();
         peer.Tag = new PlayerTag()
         {
@@ -60,6 +61,7 @@ public class NetListener : INetEventListener
         catch (ParseException)
         {
             peer.Disconnect();
+
             Time.Log(
                 "ParseException",
                 $"Id: {peer.Id}",
