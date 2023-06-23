@@ -40,10 +40,9 @@ while (!Console.KeyAvailable)
     {
         testPacketTimer.Restart();
 
-        //var testPacket = packets.Rent<TestPacket>();
-        //testPacket.TestInt = 420;
-        //testPacket.TestVector2 = new Vector2(69, 69);
-        //packets.Send(autoRecycle: true, testPacket);
+        var testPacket = packets.Rent<TestPacket>()
+            .Reset(420, new(69, 69));
+        packets.Send(autoRecycle: true, testPacket);
     }
 
     Thread.Sleep(17);
