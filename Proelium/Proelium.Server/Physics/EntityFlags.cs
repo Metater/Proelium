@@ -11,7 +11,7 @@ public enum EntityFlags : byte
     CanRepulseOthers    = 0b_0001_0000,
     CanBeRepulsed       = 0b_0010_0000,
     VelocityEpsilon     = 0b_0100_0000,
-    StaticCollider      = 0b_1000_0000
+    Static      = 0b_1000_0000
 }
 
 public static class EntityFlagsExtension

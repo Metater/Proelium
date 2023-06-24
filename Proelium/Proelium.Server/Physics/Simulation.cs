@@ -55,11 +55,10 @@ public class Simulation
     {
         foreach (var entity in entities)
         {
-            // Skip static colliders
+            // Skip static entities
             {
-                bool hasCollider = entity.flags.Has(EntityFlags.Collider);
-                bool hasStaticCollider = entity.flags.Has(EntityFlags.StaticCollider);
-                if (hasCollider && hasStaticCollider)
+                bool hasStatic = entity.flags.Has(EntityFlags.Static);
+                if (hasStatic)
                 {
                     continue;
                 }
@@ -231,7 +230,7 @@ public class Simulation
             bool surrounderHasCollider = surrounder.flags.Has(EntityFlags.Collider);
             if (surrounderHasCollider && hasCollider)
             {
-                bool surrounderHasStaticCollider = surrounder.flags.Has(EntityFlags.StaticCollider);
+                bool surrounderHasStaticCollider = surrounder.flags.Has(EntityFlags.Static);
                 // Trigger
                 if (hasTriggerCollider)
                 {
