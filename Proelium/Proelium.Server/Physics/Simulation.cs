@@ -249,6 +249,7 @@ public class Simulation
         }
     }
 
+    // TODO CONTINUE HERE A LOT WILL CHANGE
     private void Collide(Entity entity, Entity surrounder)
     {
         AABB entityCollider = entity.collider.Offset(entity.position);
