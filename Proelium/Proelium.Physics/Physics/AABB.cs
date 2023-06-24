@@ -4,8 +4,10 @@ namespace Proelium.Server.Physics;
 
 public struct AABB
 {
-    public Vector2 min;
-    public Vector2 max;
+    public static readonly AABB All = new(new(float.MinValue), new(float.MaxValue));
+
+    public readonly Vector2 min;
+    public readonly Vector2 max;
 
     public float North => max.Y;
     public float East => max.X;

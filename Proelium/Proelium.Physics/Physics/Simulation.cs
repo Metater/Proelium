@@ -57,7 +57,7 @@ public class Simulation
         {
             // Skip static entities
             {
-                bool hasStatic = entity.flags.Has(EntityFlags.Static);
+                bool hasStatic = entity.Flags.Has(EntityFlags.Static);
                 if (hasStatic)
                 {
                     continue;
@@ -65,16 +65,13 @@ public class Simulation
             }
 
             // Move
-            if (entity.velocity != Vector2.Zero)
-            {
-                entity.position += entity.velocity * deltaTime;
-            }
+            entity.position += entity.velocity * deltaTime;
 
             // Interact
             {
-                bool canBeRepulsed = entity.flags.Has(EntityFlags.CanBeRepulsed);
-                bool hasCollider = entity.flags.Has(EntityFlags.Collider);
-                bool hasTriggerCollider = entity.flags.Has(EntityFlags.TriggerCollider);
+                bool canBeRepulsed = entity.Flags.Has(EntityFlags.CanBeRepulsed);
+                bool hasCollider = entity.Flags.Has(EntityFlags.Collider);
+                bool hasTriggerCollider = entity.Flags.Has(EntityFlags.TriggerCollider);
 
                 if (canBeRepulsed || (hasCollider && entity.velocity != Vector2.Zero) || (hasCollider && hasTriggerCollider))
                 {
@@ -109,7 +106,7 @@ public class Simulation
             {
                 // Apply drag
                 {
-                    bool hasDrag = entity.flags.Has(EntityFlags.Drag);
+                    bool hasDrag = entity.Flags.Has(EntityFlags.Drag);
                     if (hasDrag)
                     {
                         entity.velocity *= 1.0f - (entity.dragForce * deltaTime);
@@ -118,7 +115,7 @@ public class Simulation
 
                 // Apply velocity epsilon
                 {
-                    bool hasVelocityEpsilon = entity.flags.Has(EntityFlags.VelocityEpsilon);
+                    bool hasVelocityEpsilon = entity.Flags.Has(EntityFlags.VelocityEpsilon);
                     if (hasVelocityEpsilon)
                     {
                         if (entity.velocity.X != 0 && MathF.Abs(entity.velocity.X) < entity.velocityEpsilon)
@@ -137,34 +134,34 @@ public class Simulation
             // Apply bounds
             if (entity.velocity != Vector2.Zero)
             {
-                bool hasBounds = entity.flags.Has(EntityFlags.Bounds);
+                bool hasBounds = entity.Flags.Has(EntityFlags.Bounds);
                 if (hasBounds)
                 {
                     Direction direction = Direction.None;
 
-                    if (entity.position.Y > entity.bounds.North)
+                    if (entity.position.Y > entity.Bounds.North)
                     {
                         direction |= Direction.North;
-                        entity.position.Y = entity.bounds.North;
+                        entity.position.Y = entity.Bounds.North;
                         entity.velocity = new(entity.velocity.X, 0);
                     }
-                    else if (entity.position.Y < entity.bounds.South)
+                    else if (entity.position.Y < entity.Bounds.South)
                     {
                         direction |= Direction.South;
-                        entity.position.Y = entity.bounds.South;
+                        entity.position.Y = entity.Bounds.South;
                         entity.velocity = new(entity.velocity.X, 0);
                     }
 
-                    if (entity.position.X > entity.bounds.East)
+                    if (entity.position.X > entity.Bounds.East)
                     {
                         direction |= Direction.East;
-                        entity.position.X = entity.bounds.East;
+                        entity.position.X = entity.Bounds.East;
                         entity.velocity = new(0, entity.velocity.Y);
                     }
-                    else if (entity.position.X < entity.bounds.West)
+                    else if (entity.position.X < entity.Bounds.West)
                     {
                         direction |= Direction.West;
-                        entity.position.X = entity.bounds.West;
+                        entity.position.X = entity.Bounds.West;
                         entity.velocity = new(0, entity.velocity.Y);
                     }
 
@@ -192,7 +189,7 @@ public class Simulation
     {
         // Apply repulsion
         {
-            bool surrounderCanRepulseOthers = surrounder.flags.Has(EntityFlags.CanRepulseOthers);
+            bool surrounderCanRepulseOthers = surrounder.Flags.Has(EntityFlags.CanRepulseOthers);
 
             if (surrounderCanRepulseOthers && canBeRepulsed)
             {
@@ -227,10 +224,10 @@ public class Simulation
 
         // AABB checks
         {
-            bool surrounderHasCollider = surrounder.flags.Has(EntityFlags.Collider);
+            bool surrounderHasCollider = surrounder.Flags.Has(EntityFlags.Collider);
             if (surrounderHasCollider && hasCollider)
             {
-                bool surrounderHasStaticCollider = surrounder.flags.Has(EntityFlags.Static);
+                bool surrounderHasStaticCollider = surrounder.Flags.Has(EntityFlags.Static);
                 // Trigger
                 if (hasTriggerCollider)
                 {

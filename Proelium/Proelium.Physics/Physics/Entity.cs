@@ -4,8 +4,8 @@ namespace Proelium.Server.Physics;
 
 public class Entity
 {
-    public EntityFlags flags;
-    public AABB bounds;
+    public EntityFlags Flags { get; set; } = EntityFlags.None;
+    public AABB Bounds { get; set; } = 
     public AABB collider;
     public float dragForce;
     public float repulsionRadius;
@@ -18,20 +18,29 @@ public class Entity
     public Vector2 velocity;
     public ulong layerMask = ulong.MaxValue;
 
-    public Entity(Vector2 position)
+    internal Entity(Vector2 position)
     {
         this.position = position;
     }
 
     public void EnableFlags(EntityFlags flags)
     {
-        this.flags |= flags;
+        this.Flags |= flags;
     }
     public void DisableFlags(EntityFlags flags)
     {
-        this.flags &= ~flags;
+        this.Flags &= ~flags;
     }
-    
+
+    public void EnableLayers(ulong layers)
+    {
+        layerMask |= layers;
+    }
+    public void DisableLayers(ulong layers)
+    {
+        layerMask &= ~layers;
+    }
+
     public static bool LayersOverlap(Entity a, Entity b)
     {
         return (a.layerMask & b.layerMask) != 0;

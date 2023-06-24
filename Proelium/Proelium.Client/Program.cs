@@ -1,51 +1,52 @@
-﻿using LiteNetLib;
-using LiteNetLib.Utils;
-using Proelium.Shared;
-using Proelium.Shared.Packets;
-using Proelium.Shared.Packets.Core;
-using System.Diagnostics;
-using System.Numerics;
+﻿//using LiteNetLib;
+//using LiteNetLib.Utils;
+//using Proelium.Shared;
+//using Proelium.Shared.Packets;
+//using Proelium.Shared.Packets.Core;
+//using System.Diagnostics;
 
 Console.WriteLine("Hello, World!");
 
-EventBasedNetListener listener = new();
-NetManager client = new(listener);
-NetDataWriter writer = new();
-NetPacketProcessor processor = new();
 
-ClientPackets packets = new(processor, client);
 
-ConnectionData connectionData = new()
-{
-    Name = "TooManyTransistors"
-};
+//EventBasedNetListener listener = new();
+//NetManager client = new(listener);
+//NetDataWriter writer = new();
+//NetPacketProcessor processor = new();
 
-connectionData.Serialize(writer);
+//ClientPackets packets = new(processor, client);
 
-client.Start();
+//ConnectionData connectionData = new()
+//{
+//    Name = "TooManyTransistors"
+//};
 
-Stopwatch testPacketTimer = Stopwatch.StartNew();
+//connectionData.Serialize(writer);
 
-while (!Console.KeyAvailable)
-{
-    while (client.FirstPeer == null)
-    {
-        client.Connect("localhost", 7777, writer);
-        Thread.Sleep(500);
-    }
+//client.Start();
 
-    client.PollEvents();
+//Stopwatch testPacketTimer = Stopwatch.StartNew();
 
-    if (testPacketTimer.Elapsed.TotalSeconds > 2)
-    {
-        testPacketTimer.Restart();
+//while (!Console.KeyAvailable)
+//{
+//    while (client.FirstPeer == null)
+//    {
+//        client.Connect("localhost", 7777, writer);
+//        Thread.Sleep(500);
+//    }
 
-        var testPacket = packets.Rent<TestPacket>()
-            .Reset(420, new(69, 69));
-        packets.Send(autoRecycle: true, testPacket);
-    }
+//    client.PollEvents();
 
-    Thread.Sleep(17);
-}
+//    if (testPacketTimer.Elapsed.TotalSeconds > 2)
+//    {
+//        testPacketTimer.Restart();
 
-client.Stop();
+//        var testPacket = packets.Rent<TestPacket>()
+//            .Reset(420, new(69, 69));
+//        packets.Send(autoRecycle: true, testPacket);
+//    }
+
+//    Thread.Sleep(17);
+//}
+
+//client.Stop();

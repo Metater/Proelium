@@ -2,8 +2,8 @@
 
 public struct Cell
 {
-    public ushort x;
-    public ushort y;
+    public readonly ushort x;
+    public readonly ushort y;
 
     public Cell(ushort x, ushort y)
     {

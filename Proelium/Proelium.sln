@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proelium.Shared", "Proelium
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proelium.Server.Generators", "Proelium.Server.Generators\Proelium.Server.Generators.csproj", "{28B77619-9FBD-4A7E-B864-B644CB47A36B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proelium.Client", "Proelium.Client\Proelium.Client.csproj", "{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proelium.Client", "Proelium.Client\Proelium.Client.csproj", "{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proelium.Physics", "Proelium.Physics\Proelium.Physics.csproj", "{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
