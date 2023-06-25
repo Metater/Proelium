@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Proelium.Server.Physics;
+namespace Proelium.Physics;
 
 public class Partitioner
 {

@@ -1,7 +1,14 @@
-﻿using Microsoft.VisualBasic;
-using System.Numerics;
+﻿using System.Numerics;
 
-namespace Proelium.Server.Physics;
+namespace Proelium.Physics;
+
+public interface ISimulationListener
+{
+    public void OnRepulsion(Entity repulsee, Entity repulsor);
+    public void OnTrigger(Entity triggeree, Entity triggerer);
+    public void OnStop(Entity stopee, Entity stopper, Direction direction);
+    public void OnBoundsStop(Entity entity, Direction direction);
+}
 
 public class Simulation
 {
@@ -73,7 +80,7 @@ public class Simulation
                 bool hasCollider = entity.flags.Has(EntityFlags.Collider);
                 bool hasTriggerCollider = entity.flags.Has(EntityFlags.TriggerCollider);
 
-                if (canBeRepulsed || (hasCollider && entity.velocity != Vector2.Zero) || (hasCollider && hasTriggerCollider))
+                if (canBeRepulsed || hasCollider && entity.velocity != Vector2.Zero || hasCollider && hasTriggerCollider)
                 {
                     cellsCache.Clear();
                     entity.cell.GetSurrounding(cellsCache);
@@ -109,7 +116,7 @@ public class Simulation
                     bool hasDrag = entity.flags.Has(EntityFlags.Drag);
                     if (hasDrag)
                     {
-                        entity.velocity *= 1.0f - (entity.dragForce * deltaTime);
+                        entity.velocity *= 1.0f - entity.dragForce * deltaTime;
                     }
                 }
 
