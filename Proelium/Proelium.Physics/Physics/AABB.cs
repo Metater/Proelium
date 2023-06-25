@@ -2,7 +2,7 @@
 
 namespace Proelium.Server.Physics;
 
-public struct AABB
+public readonly struct AABB
 {
     public static readonly AABB All = new(new(float.MinValue), new(float.MaxValue));
 

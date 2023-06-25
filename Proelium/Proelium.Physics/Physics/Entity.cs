@@ -4,45 +4,46 @@ namespace Proelium.Server.Physics;
 
 public class Entity
 {
+    // TODO WHY PROPERTIES??????? DONT NEED MAYBE????
     public EntityFlags Flags { get; set; } = EntityFlags.None;
-    public AABB Bounds { get; set; } = 
-    public AABB collider;
-    public float dragForce;
-    public float repulsionRadius;
-    public float repulsionForce;
-    public float repulsionMaxMagnitude;
-    public float velocityEpsilon = 1f / 256f;
+    public AABB Bounds { get; set; } = AABB.All;
+    public AABB Collider { get; set; } = new();
+    public float DragForce { get; set; } = 0;
+    public float RepulsionRadius { get; set; } = 0;
+    public float RepulsionForce { get; set; } = 0;
+    public float RepulsionMaxMagnitude { get; set; } = 0;
+    public float VelocityEpsilon { get; set; } = 1f / 256f;
 
-    public Cell cell;
-    public Vector2 position;
-    public Vector2 velocity;
-    public ulong layerMask = ulong.MaxValue;
+    public Cell Cell { get; set; }
+    public Vector2 Position { get; set; }
+    public Vector2 Velocity { get; set; }
+    public ulong LayerMask { get; set; } = ulong.MaxValue;
 
     internal Entity(Vector2 position)
     {
-        this.position = position;
+        Position = position;
     }
 
     public void EnableFlags(EntityFlags flags)
     {
-        this.Flags |= flags;
+        Flags |= flags;
     }
     public void DisableFlags(EntityFlags flags)
     {
-        this.Flags &= ~flags;
+        Flags &= ~flags;
     }
 
     public void EnableLayers(ulong layers)
     {
-        layerMask |= layers;
+        LayerMask |= layers;
     }
     public void DisableLayers(ulong layers)
     {
-        layerMask &= ~layers;
+        LayerMask &= ~layers;
     }
 
     public static bool LayersOverlap(Entity a, Entity b)
     {
-        return (a.layerMask & b.layerMask) != 0;
+        return (a.LayerMask & b.LayerMask) != 0;
     }
 }

@@ -22,16 +22,16 @@ public class Simulation
 
     public void Spawn(Entity entity)
     {
-        entity.cell = partitioner.GetCell(entity.position);
+        entity.Cell = partitioner.GetCell(entity.Position);
 
         entities.Add(entity);
-        AddEntityToCell(entity.cell, entity);
+        AddEntityToCell(entity.Cell, entity);
     }
     public void Despawn(Entity entity)
     {
         if (entities.Remove(entity))
         {
-            RemoveEntityFromCell(entity.cell, entity);
+            RemoveEntityFromCell(entity.Cell, entity);
         }
     }
     public bool Contains(Entity entity)
@@ -65,7 +65,7 @@ public class Simulation
             }
 
             // Move
-            entity.position += entity.velocity * deltaTime;
+            entity.Position += entity.Velocity * deltaTime;
 
             // Interact
             {
@@ -73,10 +73,10 @@ public class Simulation
                 bool hasCollider = entity.Flags.Has(EntityFlags.Collider);
                 bool hasTriggerCollider = entity.Flags.Has(EntityFlags.TriggerCollider);
 
-                if (canBeRepulsed || (hasCollider && entity.velocity != Vector2.Zero) || (hasCollider && hasTriggerCollider))
+                if (canBeRepulsed || (hasCollider && entity.Velocity != Vector2.Zero) || (hasCollider && hasTriggerCollider))
                 {
                     cellsCache.Clear();
-                    entity.cell.GetSurrounding(cellsCache);
+                    entity.Cell.GetSurrounding(cellsCache);
                     foreach (var cell in cellsCache)
                     {
                         if (!cells.TryGetValue(cell, out var surrounding))
@@ -102,14 +102,14 @@ public class Simulation
                 }
             }
 
-            if (entity.velocity != Vector2.Zero)
+            if (entity.Velocity != Vector2.Zero)
             {
                 // Apply drag
                 {
                     bool hasDrag = entity.Flags.Has(EntityFlags.Drag);
                     if (hasDrag)
                     {
-                        entity.velocity *= 1.0f - (entity.dragForce * deltaTime);
+                        entity.Velocity *= 1.0f - (entity.DragForce * deltaTime);
                     }
                 }
 
@@ -118,51 +118,51 @@ public class Simulation
                     bool hasVelocityEpsilon = entity.Flags.Has(EntityFlags.VelocityEpsilon);
                     if (hasVelocityEpsilon)
                     {
-                        if (entity.velocity.X != 0 && MathF.Abs(entity.velocity.X) < entity.velocityEpsilon)
+                        if (entity.Velocity.X != 0 && MathF.Abs(entity.Velocity.X) < entity.VelocityEpsilon)
                         {
-                            entity.velocity = new(0, entity.velocity.Y);
+                            entity.Velocity = new(0, entity.Velocity.Y);
                         }
 
-                        if (entity.velocity.Y != 0 && MathF.Abs(entity.velocity.Y) < entity.velocityEpsilon)
+                        if (entity.Velocity.Y != 0 && MathF.Abs(entity.Velocity.Y) < entity.VelocityEpsilon)
                         {
-                            entity.velocity = new(entity.velocity.X, 0);
+                            entity.Velocity = new(entity.Velocity.X, 0);
                         }
                     }
                 }
             }
 
             // Apply bounds
-            if (entity.velocity != Vector2.Zero)
+            if (entity.Velocity != Vector2.Zero)
             {
                 bool hasBounds = entity.Flags.Has(EntityFlags.Bounds);
                 if (hasBounds)
                 {
                     Direction direction = Direction.None;
 
-                    if (entity.position.Y > entity.Bounds.North)
+                    if (entity.Position.Y > entity.Bounds.North)
                     {
                         direction |= Direction.North;
-                        entity.position.Y = entity.Bounds.North;
-                        entity.velocity = new(entity.velocity.X, 0);
+                        entity.Position.Y = entity.Bounds.North;
+                        entity.Velocity = new(entity.Velocity.X, 0);
                     }
-                    else if (entity.position.Y < entity.Bounds.South)
+                    else if (entity.Position.Y < entity.Bounds.South)
                     {
                         direction |= Direction.South;
-                        entity.position.Y = entity.Bounds.South;
-                        entity.velocity = new(entity.velocity.X, 0);
+                        entity.Position.Y = entity.Bounds.South;
+                        entity.Velocity = new(entity.Velocity.X, 0);
                     }
 
-                    if (entity.position.X > entity.Bounds.East)
+                    if (entity.Position.X > entity.Bounds.East)
                     {
                         direction |= Direction.East;
-                        entity.position.X = entity.Bounds.East;
-                        entity.velocity = new(0, entity.velocity.Y);
+                        entity.Position.X = entity.Bounds.East;
+                        entity.Velocity = new(0, entity.Velocity.Y);
                     }
-                    else if (entity.position.X < entity.Bounds.West)
+                    else if (entity.Position.X < entity.Bounds.West)
                     {
                         direction |= Direction.West;
-                        entity.position.X = entity.Bounds.West;
-                        entity.velocity = new(0, entity.velocity.Y);
+                        entity.Position.X = entity.Bounds.West;
+                        entity.Velocity = new(0, entity.Velocity.Y);
                     }
 
                     if (direction != Direction.None)
@@ -174,12 +174,12 @@ public class Simulation
 
             // Update cell
             {
-                Cell initialCell = entity.cell;
-                entity.cell = partitioner.GetCell(entity.position);
-                if (entity.cell != initialCell)
+                Cell initialCell = entity.Cell;
+                entity.Cell = partitioner.GetCell(entity.Position);
+                if (entity.Cell != initialCell)
                 {
                     RemoveEntityFromCell(initialCell, entity);
-                    AddEntityToCell(entity.cell, entity);
+                    AddEntityToCell(entity.Cell, entity);
                 }
             }
         }
@@ -193,20 +193,20 @@ public class Simulation
 
             if (surrounderCanRepulseOthers && canBeRepulsed)
             {
-                float distanceX = surrounder.position.X - entity.position.X;
-                float distanceY = surrounder.position.Y - entity.position.Y;
+                float distanceX = surrounder.Position.X - entity.Position.X;
+                float distanceY = surrounder.Position.Y - entity.Position.Y;
                 float squareDistance = distanceX * distanceX + distanceY * distanceY;
-                float minDistance = entity.repulsionRadius + surrounder.repulsionRadius;
+                float minDistance = entity.RepulsionRadius + surrounder.RepulsionRadius;
 
                 bool withinRadius = minDistance * minDistance > squareDistance;
                 if (withinRadius)
                 {
-                    float minMaxRepulsionForce = Math.Min(entity.repulsionMaxMagnitude, surrounder.repulsionMaxMagnitude);
+                    float minMaxRepulsionForce = Math.Min(entity.RepulsionMaxMagnitude, surrounder.RepulsionMaxMagnitude);
                     Vector2 repulsionForce;
 
                     if (squareDistance != 0)
                     {
-                        float repulsionMagnitude = (entity.repulsionForce + surrounder.repulsionForce) * (1f / squareDistance);
+                        float repulsionMagnitude = (entity.RepulsionForce + surrounder.RepulsionForce) * (1f / squareDistance);
                         repulsionMagnitude = Math.Clamp(repulsionMagnitude, -minMaxRepulsionForce, minMaxRepulsionForce);
                         float reciprocalDistance = MathF.ReciprocalSqrtEstimate(squareDistance);
                         repulsionForce = new Vector2(distanceX * reciprocalDistance, distanceY * reciprocalDistance) * -repulsionMagnitude;
@@ -216,7 +216,7 @@ public class Simulation
                         repulsionForce = new Vector2(0, 1) * -minMaxRepulsionForce;
                     }
 
-                    entity.velocity += repulsionForce * deltaTime;
+                    entity.Velocity += repulsionForce * deltaTime;
                     listener.OnRepulsion(entity, surrounder);
                 }
             }
@@ -231,7 +231,7 @@ public class Simulation
                 // Trigger
                 if (hasTriggerCollider)
                 {
-                    if (entity.collider.Overlaps(surrounder.collider))
+                    if (entity.Collider.Overlaps(surrounder.Collider))
                     {
                         listener.OnTrigger(entity, surrounder);
                     }
@@ -248,34 +248,34 @@ public class Simulation
     // TODO CONTINUE HERE A LOT WILL CHANGE
     private void Collide(Entity entity, Entity surrounder)
     {
-        AABB entityCollider = entity.collider.Offset(entity.position);
-        AABB surrounderCollider = surrounder.collider.Offset(surrounder.position);
+        AABB entityCollider = entity.Collider.Offset(entity.Position);
+        AABB surrounderCollider = surrounder.Collider.Offset(surrounder.Position);
         Direction direction = Direction.None;
 
         if (entityCollider.North > surrounderCollider.North)
         {
             direction |= Direction.North;
-            entity.position.Y = surrounderCollider.North;
-            entity.velocity = new(entity.velocity.X, 0);
+            entity.Position.Y = surrounderCollider.North;
+            entity.Velocity = new(entity.Velocity.X, 0);
         }
         else if (entityCollider.South < surrounderCollider.South)
         {
             direction |= Direction.South;
-            entity.position.Y = surrounderCollider.South;
-            entity.velocity = new(entity.velocity.X, 0);
+            entity.Position.Y = surrounderCollider.South;
+            entity.Velocity = new(entity.Velocity.X, 0);
         }
 
         if (entityCollider.East > surrounderCollider.East)
         {
             direction |= Direction.East;
-            entity.position.X = surrounderCollider.East;
-            entity.velocity = new(0, entity.velocity.Y);
+            entity.Position.X = surrounderCollider.East;
+            entity.Velocity = new(0, entity.Velocity.Y);
         }
         else if (entityCollider.West < surrounderCollider.West)
         {
             direction |= Direction.West;
-            entity.position.X = surrounderCollider.West;
-            entity.velocity = new(0, entity.velocity.Y);
+            entity.Position.X = surrounderCollider.West;
+            entity.Velocity = new(0, entity.Velocity.Y);
         }
 
         if (direction != Direction.None)

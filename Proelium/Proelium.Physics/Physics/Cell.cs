@@ -1,6 +1,6 @@
 ﻿namespace Proelium.Server.Physics;
 
-public struct Cell
+public readonly struct Cell
 {
     public readonly ushort x;
     public readonly ushort y;
