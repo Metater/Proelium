@@ -7,8 +7,6 @@
 
 Console.WriteLine("Hello, World!");
 
-
-
 //EventBasedNetListener listener = new();
 //NetManager client = new(listener);
 //NetDataWriter writer = new();
