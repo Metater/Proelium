@@ -6,13 +6,13 @@ public abstract class Query
 
     public abstract IEnumerable<Type> GetComponentTypes();
     /// <summary>
-    /// Components are updated on the entity that this component references.
+    /// The added component, and the updated entity.
     /// </summary>
-    public abstract void OnAddComponent(Component component);
+    public abstract void OnAddComponent(Component component, Entity entity);
     /// <summary>
-    /// Do not rely on components being updated for the entity that this component references.
+    /// The removed component, the entity with the remaining components, and if this removal is the entity's last.
     /// </summary>
-    public abstract void OnRemoveComponent(Component component);
+    public abstract void OnRemoveComponent(Component component, Entity entity, bool destroyedEntity);
 }
 
 internal class QueryManager
@@ -23,23 +23,23 @@ internal class QueryManager
     // <component type, List<Query>>
     private readonly Dictionary<Type, List<Query>> subscriptions = new();
 
-    internal void OnAddComponent(Component component)
+    internal void OnAddComponent(Component component, Entity entity)
     {
         if (subscriptions.TryGetValue(component.GetType(), out var subscribedQueries))
         {
             foreach (var subscribedQuery in subscribedQueries)
             {
-                subscribedQuery.OnAddComponent(component);
+                subscribedQuery.OnAddComponent(component, entity);
             }
         }
     }
-    internal void OnRemoveComponent(Component component)
+    internal void OnRemoveComponent(Component component, Entity entity)
     {
         if (subscriptions.TryGetValue(component.GetType(), out var subscribedQueries))
         {
             foreach (var subscribedQuery in subscribedQueries)
             {
-                subscribedQuery.OnRemoveComponent(component);
+                subscribedQuery.OnRemoveComponent(component, entity);
             }
         }
     }

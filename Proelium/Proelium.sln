@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proelium.Server", "Proelium
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proelium.Shared", "Proelium.Shared\Proelium.Shared.csproj", "{017B9854-191F-4A59-84A6-E450033352BB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proelium.Server.Generators", "Proelium.Server.Generators\Proelium.Server.Generators.csproj", "{28B77619-9FBD-4A7E-B864-B644CB47A36B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proelium.Physics", "Proelium.Physics\Proelium.Physics.csproj", "{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proelium.Client", "Proelium.Client\Proelium.Client.csproj", "{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proelium.Ecs", "Proelium.Ecs\Proelium.Ecs.csproj", "{67D7243A-C9B2-42CA-802E-6436FECD56E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proelium.Physics", "Proelium.Physics\Proelium.Physics.csproj", "{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proelium.TestClient", "Proelium.TestClient\Proelium.TestClient.csproj", "{A84AEB02-9969-412C-86B6-48C5DB5F83C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,18 +27,18 @@ Global
 		{017B9854-191F-4A59-84A6-E450033352BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{017B9854-191F-4A59-84A6-E450033352BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{017B9854-191F-4A59-84A6-E450033352BB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{28B77619-9FBD-4A7E-B864-B644CB47A36B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{28B77619-9FBD-4A7E-B864-B644CB47A36B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{28B77619-9FBD-4A7E-B864-B644CB47A36B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{28B77619-9FBD-4A7E-B864-B644CB47A36B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4C448F53-44B1-49A1-B8DA-DA1FBBA9CAFB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DD87FD9-1BD5-431E-BB97-096EC012C2EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67D7243A-C9B2-42CA-802E-6436FECD56E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67D7243A-C9B2-42CA-802E-6436FECD56E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67D7243A-C9B2-42CA-802E-6436FECD56E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67D7243A-C9B2-42CA-802E-6436FECD56E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A84AEB02-9969-412C-86B6-48C5DB5F83C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A84AEB02-9969-412C-86B6-48C5DB5F83C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A84AEB02-9969-412C-86B6-48C5DB5F83C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A84AEB02-9969-412C-86B6-48C5DB5F83C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

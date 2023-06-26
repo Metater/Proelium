@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Proelium.Ecs;
 
@@ -6,6 +7,19 @@ internal class EntityIdGen
 {
     private ulong next = 0;
     internal ulong Next => next++;
+}
+
+public readonly struct Entity
+{
+    public readonly ulong entityId;
+    internal readonly List<Component> components;
+    public readonly IReadOnlyList<Component> Components => components;
+
+    internal Entity(ulong entityId, List<Component> components)
+    {
+        this.entityId = entityId;
+        this.components = components;
+    }
 }
 
 public abstract class Component
@@ -16,15 +30,11 @@ public abstract class Component
 public class EntityManager
 {
     internal readonly EntityIdGen entityIdGen = new();
-    // <entity id, List<Component>>
-    private readonly Dictionary<ulong, List<Component>> entities;
+    // <entity id, Entity>
+    private readonly Dictionary<ulong, Entity> entities;
     private readonly QueryManager queryManager;
 
     private readonly Stack<List<Component>> componentListPool = new();
-
-    #if DEBUG
-    private readonly HashSet<Type> typesCache = new();
-    #endif
 
     public EntityManager(int entitiesCapacity = 0)
     {
@@ -35,29 +45,33 @@ public class EntityManager
     #region Entities
     public ulong CreateEntity()
     {
-        ulong entityId = entityIdGen.Next;
         if (!componentListPool.TryPop(out var components))
         {
             components = new();
         }
-        entities[entityId] = components;
+
+        ulong entityId = entityIdGen.Next;
+        entities[entityId] = new Entity(entityId, components);
         return entityId;
     }
 
     public bool DestroyEntity(ulong entityId)
     {
-        if (!entities.TryGetValue(entityId, out var components))
+        if (!entities.TryGetValue(entityId, out var entity))
         {
             return false;
         }
 
-        foreach (var component in components)
+        for (int i = entity.components.Count - 1; i >= 0; i--)
         {
-            queryManager.OnRemoveComponent(component);
+            Component removed = entity.components[i];
+            entity.components.RemoveAt(i);
+            queryManager.OnRemoveComponent(removed, entity);
         }
-        components.Clear();
 
-        componentListPool.Push(components);
+        Debug.Assert(entity.components.Count == 0);
+
+        componentListPool.Push(entity.components);
         return true;
     }
     #endregion
@@ -67,42 +81,39 @@ public class EntityManager
     {
         component.EntityId = entityId;
 
-        if (!entities.TryGetValue(entityId, out var components))
+        if (!entities.TryGetValue(entityId, out var entity))
         {
-            components = new();
-            entities[entityId] = components;
+            throw new Exception($"Entity with id {entityId} not found while adding component {component}.");
         }
 
-        components.Add(component);
-
         #if !OPTIMIZE
-        typesCache.Clear();
-        foreach (var comp in components)
+        Type type = typeof(T);
+        foreach (var comp in entity.components)
         {
-            Type type = comp.GetType();
-            bool unique = typesCache.Add(type);
-            if (!unique)
+            if (comp.GetType() == type)
             {
                 throw new Exception($"Found duplicate component type {type} while adding component {component} to entity {entityId}.");
             }
         }
         #endif
+
+        entity.components.Add(component);
     }
 
     public bool RemoveComponent<T>(ulong entityId) where T : Component
     {
-        if (!entities.TryGetValue(entityId, out var components))
+        if (!entities.TryGetValue(entityId, out var entity))
         {
             return false;
         }
 
         Type type = typeof(T);
 
-        for (int i = 0; i < components.Count; i++)
+        for (int i = 0; i < entity.components.Count; i++)
         {
-            if (components[i].GetType() == type)
+            if (entity.components[i].GetType() == type)
             {
-                components.RemoveAt(i);
+                entity.components.RemoveAt(i);
                 return true;
             }
         }

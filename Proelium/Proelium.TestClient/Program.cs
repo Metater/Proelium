@@ -5,6 +5,8 @@
 //using Proelium.Shared.Packets.Core;
 //using System.Diagnostics;
 
+using System.Diagnostics;
+
 Console.WriteLine("Hello, World!");
 
 //EventBasedNetListener listener = new();
