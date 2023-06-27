@@ -5,9 +5,11 @@
 //using Proelium.Shared.Packets.Core;
 //using System.Diagnostics;
 
-using System.Diagnostics;
+using Proelium.Ecs;
 
 Console.WriteLine("Hello, World!");
+
+EcsTest.Run();
 
 //EventBasedNetListener listener = new();
 //NetManager client = new(listener);

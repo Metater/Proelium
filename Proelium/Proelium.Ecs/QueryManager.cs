@@ -10,9 +10,9 @@ public abstract class Query
     /// </summary>
     public abstract void OnAddComponent(Component component, Entity entity);
     /// <summary>
-    /// The removed component, the entity with the remaining components, and if this removal is the entity's last.
+    /// The removed component, and the entity with the remaining components.
     /// </summary>
-    public abstract void OnRemoveComponent(Component component, Entity entity, bool destroyedEntity);
+    public abstract void OnRemoveComponent(Component component, Entity entity);
 }
 
 internal class QueryManager

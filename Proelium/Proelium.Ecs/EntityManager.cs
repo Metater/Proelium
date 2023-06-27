@@ -13,6 +13,7 @@ public readonly struct Entity
 {
     public readonly ulong entityId;
     internal readonly List<Component> components;
+
     public readonly IReadOnlyList<Component> Components => components;
 
     internal Entity(ulong entityId, List<Component> components)
@@ -20,12 +21,71 @@ public readonly struct Entity
         this.entityId = entityId;
         this.components = components;
     }
+
+    public T Get<T>() where T : Component
+    {
+        Type type = typeof(T);
+
+        for (int i = 0; i < components.Count; i++)
+        {
+            Component comp = components[i];
+            if (comp.GetType() == type)
+            {
+                return (T)comp;
+            }
+        }
+
+        throw new Exception($"Could not get component of type {type} from entity {entityId}; component doesn't exist on entity.");
+    }
+
+    public bool TryGet<T>([MaybeNullWhen(false)] out T component) where T : Component
+    {
+        Type type = typeof(T);
+
+        for (int i = 0; i < components.Count; i++)
+        {
+            Component comp = components[i];
+            if (comp.GetType() == type)
+            {
+                component = (T)comp;
+                return true;
+            }
+        }
+
+        component = default;
+        return false;
+    }
+
+    public bool Contains<T>() where T : Component
+    {
+        Type type = typeof(T);
+
+        for (int i = 0; i < components.Count; i++)
+        {
+            if (components[i].GetType() == type)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
-public abstract class Component
+public abstract class Component // : IAspect
 {
     public ulong EntityId { get; internal set; }
+
+    //public void GetComponentTypes(List<Type> componentTypes)
+    //{
+    //    componentTypes.Add(GetType());
+    //}
 }
+
+//public interface IAspect
+//{
+//    public void GetComponentTypes(List<Type> componentTypes);
+//}
 
 public class EntityManager
 {
@@ -43,7 +103,7 @@ public class EntityManager
     }
 
     #region Entities
-    public ulong CreateEntity()
+    public Entity CreateEntity()
     {
         if (!componentListPool.TryPop(out var components))
         {
@@ -51,8 +111,9 @@ public class EntityManager
         }
 
         ulong entityId = entityIdGen.Next;
-        entities[entityId] = new Entity(entityId, components);
-        return entityId;
+        Entity entity = new(entityId, components);
+        entities[entityId] = entity;
+        return entity;
     }
 
     public bool DestroyEntity(ulong entityId)
@@ -64,15 +125,30 @@ public class EntityManager
 
         for (int i = entity.components.Count - 1; i >= 0; i--)
         {
-            Component removed = entity.components[i];
+            Component component = entity.components[i];
             entity.components.RemoveAt(i);
-            queryManager.OnRemoveComponent(removed, entity);
+            queryManager.OnRemoveComponent(component, entity);
         }
 
-        Debug.Assert(entity.components.Count == 0);
+        Trace.Assert(entity.components.Count == 0);
 
         componentListPool.Push(entity.components);
         return true;
+    }
+
+    public Entity GetEntity(ulong entityId)
+    {
+        if (!entities.TryGetValue(entityId, out var entity))
+        {
+            throw new Exception($"Could not get entity {entityId}; entity doesn't exist.");
+        }
+
+        return entity;
+    }
+
+    public bool TryGetEntity(ulong entityId, [MaybeNullWhen(false)] out Entity entity)
+    {
+        return entities.TryGetValue(entityId, out entity);
     }
     #endregion
 
@@ -81,23 +157,47 @@ public class EntityManager
     {
         component.EntityId = entityId;
 
+        Type type = typeof(T);
+
         if (!entities.TryGetValue(entityId, out var entity))
         {
-            throw new Exception($"Entity with id {entityId} not found while adding component {component}.");
+            throw new Exception($"Entity with id {entityId} not found while adding component {component} with type {type}.");
         }
 
-        #if !OPTIMIZE
-        Type type = typeof(T);
         foreach (var comp in entity.components)
         {
             if (comp.GetType() == type)
             {
-                throw new Exception($"Found duplicate component type {type} while adding component {component} to entity {entityId}.");
+                throw new Exception($"Found duplicate component {comp} of type {type} while adding component {component} to entity {entityId}.");
             }
         }
-        #endif
 
         entity.components.Add(component);
+        queryManager.OnAddComponent(component, entity);
+    }
+
+    public bool TryAddComponent<T>(ulong entityId, T component) where T : Component
+    {
+        component.EntityId = entityId;
+
+        if (!entities.TryGetValue(entityId, out var entity))
+        {
+            return false;
+        }
+
+        Type type = typeof(T);
+
+        foreach (var comp in entity.components)
+        {
+            if (comp.GetType() == type)
+            {
+                return false;
+            }
+        }
+
+        entity.components.Add(component);
+        queryManager.OnAddComponent(component, entity);
+        return true;
     }
 
     public bool RemoveComponent<T>(ulong entityId) where T : Component
@@ -111,96 +211,11 @@ public class EntityManager
 
         for (int i = 0; i < entity.components.Count; i++)
         {
-            if (entity.components[i].GetType() == type)
+            Component component = entity.components[i];
+            if (component.GetType() == type)
             {
                 entity.components.RemoveAt(i);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public T GetComponent<T>(ulong entityId) where T : Component
-    {
-        Type type = typeof(T);
-
-        if (!entities.TryGetValue(entityId, out var components))
-        {
-            throw new Exception($"Could not get component of type {type} from entity {entityId}; entity doesn't exist.");
-        }
-
-        for (int i = 0; i < components.Count; i++)
-        {
-            Component comp = components[i];
-            if (comp.GetType() == type)
-            {
-                return (T)comp;
-            }
-        }
-
-        throw new Exception($"Could not get component of type {type} from entity {entityId}; component doesn't exist on entity.");
-    }
-
-    public bool TryGetComponent<T>(ulong entityId, [MaybeNullWhen(false)] out T component) where T : Component
-    {
-        if (!entities.TryGetValue(entityId, out var components))
-        {
-            component = default;
-            return false;
-        }
-
-        Type type = typeof(T);
-
-        for (int i = 0; i < components.Count; i++)
-        {
-            Component comp = components[i];
-            if (comp.GetType() == type)
-            {
-                component = (T)comp;
-                return true;
-            }
-        }
-
-        component = default;
-        return false;
-    }
-
-    public IReadOnlyList<Component> GetComponents(ulong entityId)
-    {
-        if (!entities.TryGetValue(entityId, out var components))
-        {
-            throw new Exception($"Could not get components from entity {entityId}; entity doesn't exist.");
-        }
-
-        return components;
-    }
-
-    public bool TryGetComponents(ulong entityId, [MaybeNullWhen(false)] out IReadOnlyList<Component> components)
-    {
-        if (!entities.TryGetValue(entityId, out var comps))
-        {
-            components = default;
-            return false;
-        }
-
-        components = comps;
-        return true;
-    }
-
-    public bool ContainsComponent<T>(ulong entityId) where T : Component
-    {
-        if (!entities.TryGetValue(entityId, out var components))
-        {
-            return false;
-        }
-
-        Type type = typeof(T);
-
-        for (int i = 0; i < components.Count; i++)
-        {
-            if (components[i].GetType() == type)
-            {
+                queryManager.OnRemoveComponent(component, entity);
                 return true;
             }
         }
@@ -209,7 +224,7 @@ public class EntityManager
     }
     #endregion
 
-    public T Query<T>() where T : Query, new()
+    public T GetQuery<T>() where T : Query, new()
     {
         return queryManager.Get<T>();
     }
