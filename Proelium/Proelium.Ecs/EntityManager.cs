@@ -72,20 +72,76 @@ public readonly struct Entity
     }
 }
 
-public abstract class Component // : IAspect
+public abstract class Component
 {
     public ulong EntityId { get; internal set; }
-
-    //public void GetComponentTypes(List<Type> componentTypes)
-    //{
-    //    componentTypes.Add(GetType());
-    //}
 }
 
-//public interface IAspect
-//{
-//    public void GetComponentTypes(List<Type> componentTypes);
-//}
+internal class ComponentPools
+{
+    private readonly int capacity;
+    private readonly Dictionary<Type, Stack<Component>> pools = new();
+
+    internal ComponentPools(int capacity = 100)
+    {
+        this.capacity = capacity;
+    }
+
+    internal T Rent<T>() where T : Component, new()
+    {
+        if (pools.TryGetValue(typeof(T), out var pool) && pool.TryPop(out var item))
+        {
+            return (T)item;
+        }
+        return new();
+    }
+
+    /// <summary>
+    /// Only return a packet when you are certain you have no lasting references to it.
+    /// </summary>
+    internal void Return<T>(T item) where T : Component, new()
+    {
+        if (item == null)
+        {
+            throw new ArgumentNullException(nameof(item));
+        }
+
+        Type type = typeof(T);
+        if (!pools.TryGetValue(type, out var pool))
+        {
+            pool = new();
+            pools[type] = pool;
+        }
+
+        if (pool.Count < capacity)
+        {
+            pool.Push(item);
+        }
+    }
+
+    /// <summary>
+    /// Only return a packet when you are certain you have no lasting references to it.
+    /// </summary>
+    internal void Return(Component item)
+    {
+        if (item == null)
+        {
+            throw new ArgumentNullException(nameof(item));
+        }
+
+        Type type = item.GetType();
+        if (!pools.TryGetValue(type, out var pool))
+        {
+            pool = new();
+            pools[type] = pool;
+        }
+
+        if (pool.Count < capacity)
+        {
+            pool.Push(item);
+        }
+    }
+}
 
 public class EntityManager
 {
@@ -95,11 +151,12 @@ public class EntityManager
     private readonly QueryManager queryManager;
 
     private readonly Stack<List<Component>> componentListPool = new();
+    private readonly ComponentPools componentPools = new();
 
-    public EntityManager(int entitiesCapacity = 0)
+    public EntityManager()
     {
-        entities = new(entitiesCapacity);
-        queryManager = new() { EntityManager = this };
+        entities = new();
+        queryManager = new(this);
     }
 
     #region Entities
@@ -128,6 +185,7 @@ public class EntityManager
             Component component = entity.components[i];
             entity.components.RemoveAt(i);
             queryManager.OnRemoveComponent(component, entity);
+            componentPools.Return(component);
         }
 
         Trace.Assert(entity.components.Count == 0);
@@ -153,8 +211,9 @@ public class EntityManager
     #endregion
 
     #region Components
-    public void AddComponent<T>(ulong entityId, T component) where T : Component
+    public T AddComponent<T>(ulong entityId) where T : Component, new()
     {
+        T component = componentPools.Rent<T>();
         component.EntityId = entityId;
 
         Type type = typeof(T);
@@ -174,14 +233,14 @@ public class EntityManager
 
         entity.components.Add(component);
         queryManager.OnAddComponent(component, entity);
+        return component;
     }
 
-    public bool TryAddComponent<T>(ulong entityId, T component) where T : Component
+    public bool TryAddComponent<T>(ulong entityId, [MaybeNullWhen(false)] out T component) where T : Component, new()
     {
-        component.EntityId = entityId;
-
         if (!entities.TryGetValue(entityId, out var entity))
         {
+            component = default;
             return false;
         }
 
@@ -191,9 +250,13 @@ public class EntityManager
         {
             if (comp.GetType() == type)
             {
+                component = default;
                 return false;
             }
         }
+
+        component = componentPools.Rent<T>();
+        component.EntityId = entityId;
 
         entity.components.Add(component);
         queryManager.OnAddComponent(component, entity);
@@ -216,6 +279,7 @@ public class EntityManager
             {
                 entity.components.RemoveAt(i);
                 queryManager.OnRemoveComponent(component, entity);
+                componentPools.Return(component);
                 return true;
             }
         }

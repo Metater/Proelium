@@ -2,8 +2,11 @@
 
 public abstract class Query
 {
-    public required EntityManager EntityManager { get; init; }
+    public EntityManager EntityManager { get; internal set; } = null!;
 
+    /// <summary>
+    /// The component types this query pertains to.
+    /// </summary>
     public abstract IEnumerable<Type> GetComponentTypes();
     /// <summary>
     /// The added component, and the updated entity.
@@ -17,11 +20,16 @@ public abstract class Query
 
 internal class QueryManager
 {
-    internal required EntityManager EntityManager { get; init; }
+    internal readonly EntityManager entityManager;
     // <query type, query>
     private readonly Dictionary<Type, Query> queries = new();
     // <component type, List<Query>>
     private readonly Dictionary<Type, List<Query>> subscriptions = new();
+
+    internal QueryManager(EntityManager entityManager)
+    {
+        this.entityManager = entityManager;
+    }
 
     internal void OnAddComponent(Component component, Entity entity)
     {
@@ -33,6 +41,7 @@ internal class QueryManager
             }
         }
     }
+
     internal void OnRemoveComponent(Component component, Entity entity)
     {
         if (subscriptions.TryGetValue(component.GetType(), out var subscribedQueries))
@@ -56,7 +65,10 @@ internal class QueryManager
 
         // Generate new query
         {
-            T query = new() { EntityManager = EntityManager };
+            T query = new()
+            {
+                EntityManager = entityManager
+            };
 
             foreach (var componentType in query.GetComponentTypes())
             {

@@ -5,11 +5,9 @@
 //using Proelium.Shared.Packets.Core;
 //using System.Diagnostics;
 
-using Proelium.Ecs;
-
 Console.WriteLine("Hello, World!");
 
-EcsTest.Run();
+Proelium.Ecs.Test.Run();
 
 //EventBasedNetListener listener = new();
 //NetManager client = new(listener);
@@ -52,3 +50,6 @@ EcsTest.Run();
 //}
 
 //client.Stop();
+
+Console.WriteLine("Press any key to close this window . . .");
+Console.ReadKey();
